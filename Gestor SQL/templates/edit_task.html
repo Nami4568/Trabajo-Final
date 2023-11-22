@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h2>Edit Task</h2>
+    <form id="editTaskForm" action="{{ url_for('edit_task', task_id=task_id) }}" method="post">
+        <label for="new_task_description">Descripcion de la Tarea</label>
+        <input type="text" id="new_task_description" name="new_task_description" value="{{ task_description }}" required>
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <button id="markCompletedButton" data-task-id="{{ task_id }}">Marcar Como Completada</button>
+    <a class="cancel-link" href="{{ url_for('index') }}">Cancelar</a>
+{% endblock %}

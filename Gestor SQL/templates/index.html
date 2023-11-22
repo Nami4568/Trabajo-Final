@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+
+{% block user_info %}
+    <p>Bienvenido, {{ username }}.</p>
+{% endblock %}
+
+{% block content %}
+    <!-- Sección para mostrar alertas -->
+    <div class="alerts">
+        {% if alert_message %}
+            <p class="alert">{{ alert_message }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Sección para mostrar tareas pendientes -->
+    <h2>Tareas Pendientes</h2>
+    <ul class="task-list">
+        {% for task in tasks_pending %}
+            <li id="task-{{ task.id }}" class="{% if task.assignee == username %}assigned-task{% endif %}">
+                <span class="task-description {% if task.completed %}completed-task{% endif %}">{{ task.description }}</span>
+                <span class="assignee">Asignado a: {{ task.assignee }}</span>
+                <span class="priority">Prioridad: {{ task.priority }}</span>
+                {% if task.status == 'vencida' %}
+                    <span class="status">Estado: Vencida</span>
+                {% else %}
+                    <span class="status">Estado: {{ task.status }}</span>
+                {% endif %}
+                {% if task.due_date %}
+                    <span class="due-date">
+                        {% if task.due_date is string %}
+                            Fecha de vencimiento: {{ task.due_date }}
+                        {% else %}
+                            Fecha de vencimiento: {{ task.due_date.strftime('%d/%m/%Y') }}
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="due-date">Sin fecha de vencimiento</span>
+                {% endif %}
+                <a class="complete-link" href="#" data-task-id="{{ task.id }}">Completar</a>
+                <a class="delete-link" href="#" data-task-id="{{ task.id }}">Eliminar</a>
+                <a class="mark-overdue-btn" href="#" data-task-id="{{ task.id }}">Marcar como Vencida</a>
+
+                <!-- Sección de comentarios y formulario para agregar comentarios -->
+                <li id="task-{{ task.id }}">
+                    <!-- Otras partes de la tarea... -->
+
+                    <!-- Sección de comentarios -->
+                    <div class="comments" id="comments-{{ task.id }}">
+                        <p>Comentarios:</p>
+                        <ul>
+                            {% for comment in task.comments %}
+                                <li>{{ comment }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    
+
+                    <!-- Formulario para agregar comentarios -->
+                    <form class="add-comment-form" id="addCommentForm-{{ task.id }}" data-task-id="{{ task.id }}" action="{{ url_for('add_comment', task_id=task.id) }}" method="post">
+                        <label for="comment_text-{{ task.id }}">Agregar Comentario:</label>
+                        <input type="text" id="comment_text-{{ task.id }}" name="comment_text" required>
+                        <button type="submit" class="add-comment-btn" data-task-id="{{ task.id }}">Agregar</button>
+                    </form>
+                </li>
+            {% endfor %}
+    </ul>
+
+    <!-- Sección para mostrar tareas completadas -->
+    <h2>Tareas Completadas</h2>
+    <ul class="task-list completed-tasks-list">
+        {% for task in tasks if task.completed %}
+            <li id="task-{{ task.id }}">
+                <span class="task-description completed-task">{{ task.description }}</span>
+                <span class="assignee">Asignado a: {{ task.assignee }}</span>
+                <span class="priority">Prioridad: {{ task.priority }}</span>
+                <span class="status">Estado: {{ task.status }}</span>
+                {% if task.due_date %}
+                    <span class="due-date">
+                        {% if task.due_date is string %}
+                            Fecha de vencimiento: {{ task.due_date }}
+                        {% else %}
+                            Fecha de vencimiento: {{ task.due_date.strftime('%d/%m/%Y') }}
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="due-date">Sin fecha de vencimiento</span>
+                {% endif %}
+                <a class="delete-link" href="#" data-task-id="{{ task.id }}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Sección para mostrar tareas vencidas -->
+    <h2>Tareas Vencidas</h2>
+    <ul class="task-list overdue-tasks-list">
+        {% for task in tasks_overdue %}
+            <li id="task-{{ task.id }}" class="overdue-task">
+                <span class="task-description">{{ task.description }}</span>
+                <span class="assignee">Asignado a: {{ task.assignee }}</span>
+                <span class="priority">Prioridad: {{ task.priority }}</span>
+                <span class="status">Estado: Vencida</span>
+                {% if task.due_date %}
+                    <span class="due-date">
+                        {% if task.due_date is string %}
+                            Fecha de vencimiento: {{ task.due_date }}
+                        {% else %}
+                            Fecha de vencimiento: {{ task.due_date.strftime('%d/%m/%Y') }}
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="due-date">Sin fecha de vencimiento</span>
+                {% endif %}
+                <a class="delete-link" href="#" data-task-id="{{ task.id }}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Formulario para agregar nueva tarea -->
+    <form id="addTaskForm" action="{{ url_for('add_task') }}" method="post">
+        <label for="task_description">Nueva Tarea:</label>
+        <input type="text" id="task_description" name="task_description" required>
+        
+        <label for="assignee">Asignar a:</label>
+        <input type="text" id="assignee" name="assignee" required>
+        
+        <label for="due_date">Fecha de vencimiento:</label>
+        <input type="date" id="due_date" name="due_date">  
+
+        <label for="priority">Prioridad:</label>
+        <select id="priority" name="priority" required>
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+        </select>
+
+        <label for="status">Estado:</label>
+        <select id="status" name="status" required>
+            <option value="pendiente">Pendiente</option>
+            <option value="completada">Completada</option>
+            <option value="vencida">Vencida</option>
+        </select>
+
+        <button type="submit">Agregar Tarea</button>
+    </form>
+
+    <!-- Importar jQuery y el script principal -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

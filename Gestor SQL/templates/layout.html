@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>Administrador de Tareas</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Administrador de Tareas</h1>
+            <div id="user-info">
+                {% block user_info %}
+                    <p>Bienvenido, Administrador.</p>
+                {% endblock %}
+            </div>
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
